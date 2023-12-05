@@ -9,7 +9,7 @@ class BookAnalysis():
         self.active = True
 
     def pick_book(self):
-        self.file = input("Please, specify the path to a book")
+        self.file = input("Please, specify the path to a book:\n")
         if self.file == "":
             self.file = "resources/miracle_in_the_andes.txt"
         else:
@@ -24,16 +24,20 @@ class BookAnalysis():
             except FileNotFoundError:
                 print("you did not give a book to analyze")
         elif ".pdf" in self.file:
-            # self.ebook = fitz.Document(self.file)
-            with fitz.open(self.file) as doc:
-                text = page.get_text() for page in doc]
+            self.book = fitz.open(self.file)
+            with open ("ebook.txt", "wb") as self.ebook:
+                for page in self.book:
+                    text = page.get_text("text", sort=True).encode("utf8")
+                # with open ("ebook.txt", "wb") as self.ebook:
+                    self.ebook.write(text)
+                    self.ebook.write(bytes((12,)))
         return self.ebook
 
 
     #Extract number of chapters
     def chapters_number(self):
         self._read_book()
-        print(self.ebook())
+        # print(type(self.ebook))
         chapter_pattern = re.compile("Chapter [0-9]+")
         result = re.findall(chapter_pattern, self.ebook)
         len(result)

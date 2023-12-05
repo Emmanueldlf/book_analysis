@@ -15,7 +15,7 @@ while book.active:
             book.most_used_words()
         case 'Chapter':
             book.chapter_analysis()
-        case 'Chapters':
+        case 'book':
             book.chapters_analysis()
         case 'Quit':
             # active = False

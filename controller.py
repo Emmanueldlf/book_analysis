@@ -24,13 +24,12 @@ class BookAnalysis():
             except FileNotFoundError:
                 print("you did not give a book to analyze")
         elif ".pdf" in self.file:
-            self.book = fitz.open(self.file)
-            with open ("ebook.txt", "wb") as self.ebook:
-                for page in self.book:
-                    text = page.get_text("text", sort=True).encode("utf8")
-                # with open ("ebook.txt", "wb") as self.ebook:
-                    self.ebook.write(text)
-                    self.ebook.write(bytes((12,)))
+            self.ebook = fitz.open(self.file)
+            # with open ("ebook.txt", "wb") as self.ebook:
+                # for page in self.book:
+                    # self.ebook = page.get_text("text", sort=True).encode("utf8")
+                    # self.ebook.write(text)
+                    # self.ebook.write(bytes((12,)))
         return self.ebook
 
 
@@ -38,10 +37,13 @@ class BookAnalysis():
     def chapters_number(self):
         self._read_book()
         # print(type(self.ebook))
-        chapter_pattern = re.compile("Chapter [0-9]+")
-        result = re.findall(chapter_pattern, self.ebook)
-        len(result)
-        print(f"there is {len(result)} chapters in this book.")
+        try:
+            chapter_pattern = re.compile("Chapter [0-9]+")
+            result = re.findall(chapter_pattern, self.ebook)
+        except TypeError:
+            toc = self.ebook.get_toc()
+            result = [item[1] for item in toc if "Chapter" in item[1]]
+        print(f"There are {len(result)} chapters in this book.")
 
     #Extract sentence where a specific word appears
     def word_times(self):

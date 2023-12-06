@@ -10,26 +10,37 @@ class BookAnalysis():
 
     def pick_book(self):
         self.file = input("Please, specify the path to a book:\n")
-        if self.file == "":
-            self.file = "resources/miracle_in_the_andes.txt"
-        else:
-            self.file
+        # if self.file == "":
+        #     self.file = "resources/miracle_in_the_andes.txt"
+        # else:
+        #     self.file
         return self.file
 
     def _read_book(self):
-        if ".txt" in self.file:
-            try:
-                with open (self.file, "r") as file:
-                    self.ebook = file.read()
-            except FileNotFoundError:
-                print("you did not give a book to analyze")
-        elif ".pdf" in self.file:
-            self.ebook = fitz.open(self.file)
+        # if ".txt" in self.file:
+            # try:
+                # with open (self.file, "r") as file:
+                    # self.ebook = file.read()
+            # except FileNotFoundError:
+                # print("you did not give a book to analyze")
+        # elif ".pdf" in self.file:
+            # self.ebook = fitz.open(self.file)
             # with open ("ebook.txt", "wb") as self.ebook:
                 # for page in self.book:
                     # self.ebook = page.get_text("text", sort=True).encode("utf8")
                     # self.ebook.write(text)
                     # self.ebook.write(bytes((12,)))
+        try:
+            with open (self.file, "r") as file:
+                self.ebook = file.read()
+            # self.ebook = fitz.open(self.file)
+
+        except UnicodeDecodeError:
+            self.ebook = fitz.open(self.file)
+            # with open (self.file, "r") as file:
+                # self.ebook = file.read()
+        except FileNotFoundError:
+            print("you did not give a book to analyze")
         return self.ebook
 
 
@@ -49,14 +60,24 @@ class BookAnalysis():
     def word_times(self):
         self._read_book()
         word = input("Pick the word you want to know how many times it appears: ")
-        word_pattern = re.compile(fr"[A-Z]{{1}}[^.]*[^a-zA-Z]+{word}[^a-zA-Z]+[^.]*.")
-        result = re.findall(word_pattern, self.book)
+        try:
+            word_pattern = re.compile(fr"[A-Z]{{1}}[^.]*[^a-zA-Z]+{word}[^a-zA-Z]+[^.]*.")
+            result = re.findall(word_pattern, self.ebook)
+        except TypeError:
+            result = 0
+            for page in self.ebook:
+                self.text = self.ebook[page.number]
+                # print(self.text)
+                result += len(self.text.search_for(f"{word}"))
+                # print(result)
+        # print(result)
+        print(f"{word} appears {result} times")
 
     #Identify the most commonly used words in the book and put them in an ordered list
     def most_used_words(self):
         self._read_book()
         pattern = re.compile("[a-zA-Z]+")
-        result = re.findall(pattern, self.book.lower())
+        result = re.findall(pattern, self.ebook.lower())
 
         words ={}
         for word in result:
@@ -89,13 +110,13 @@ class BookAnalysis():
         else:
             print("This chapter's tone is not so uplifting")
 
-        analyzer.polarity_scores(self.book)
+        analyzer.polarity_scores(self.ebook)
 
     #Analyzing each chapter's tone
     def chapters_analysis(self):
         self._read_book()
         chapter_pattern = re.compile("Chapter [0-9]+")
-        chapters = re.split(chapter_pattern, self.book)
+        chapters = re.split(chapter_pattern, self.ebook)
         chapters = chapters[1:]
 
         analyzer = SentimentIntensityAnalyzer()

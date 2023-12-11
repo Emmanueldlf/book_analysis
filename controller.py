@@ -77,7 +77,7 @@ class BookAnalysis():
     def most_used_words(self):
         self._read_book()
         result = []
-        words ={}
+        # words ={}
         english_stopwords = stopwords.words("english")
         # print(english_stopwords)
         try:
@@ -92,28 +92,24 @@ class BookAnalysis():
             for page in self.ebook:
                 self.text = self.ebook[page.number]
                 page_words = self.text.get_text("words", sort=True)
-                # for w in page_words:
-                #     if pattern.search(w[4]):
-                #         result.append(w[4])
                 # all_words = [word for word in page_words if pattern.search(word[4])]
-                # all_words = [word for word in page_words if pattern.findall(word[4])]
+                # all_words = [word[4] for word in page_words if pattern.findall(word[4])]
                 # for word in all_words:
-                    # if word not in english_stopwords:
-                        # result.append(word[4])
-                # all_words = [word for word in page_words if pattern.findall(word[4])]
+                #     if word.lower() not in english_stopwords:
+                #         result.append(word)
                 for word in page_words:
-                    if word not in english_stopwords and pattern.findall(word[4]):
+                    if word[4].lower() not in english_stopwords and pattern.findall(word[4]):
                         result.append(word[4])
-        print(result)
-        # words ={}
+        # print(result)
+        words = {}
         for word in result:
             if word in words.keys():
                 words[word] = words[word] + 1
             else:
                 words[word] = 1
 
-        words_list = [{value, key} for (key, value) in words.items()]
-        print(words_list)
+        words_list = [(value, key) for (key, value) in words.items()]
+        # print(words_list)
 
         # english_stopwords = stopwords.words("english")
         # filtered_words = []
@@ -122,7 +118,7 @@ class BookAnalysis():
                 # filtered_words.append((word,count))
                 # words_list.append((word,count))
         # filtered_words[:10]
-        sorted_list = sorted(words_list, reverse=False)
+        sorted_list = sorted(words_list, reverse=True)
         print(f"The top five most used words are {sorted_list[:5]}")
 
     #Identifying the tone of a chapter

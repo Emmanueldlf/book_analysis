@@ -7,6 +7,8 @@ while book.active:
     match user_action.title():
         case 'Book':
             book.pick_book()
+        case 'Table':
+            book._table()
         case 'Chapters':
             book.chapters_number()
         case 'Word':

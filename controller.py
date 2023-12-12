@@ -43,6 +43,16 @@ class BookAnalysis():
             print("you did not give a book to analyze")
         return self.ebook
 
+    def _table(self):
+        self._read_book()
+        self.toc = self.ebook.get_toc()
+        chapter_pattern = re.compile("Chapter [0-9]+")
+        self.chapters = {}
+        for item in self.toc:
+            if chapter_pattern.match(item[1]):
+                self.chapters[chapter_pattern.match(item[1]).group()] = item[2]
+        # print(self.chapters)
+
 
     #Extract number of chapters
     def chapters_number(self):
@@ -52,8 +62,9 @@ class BookAnalysis():
             chapter_pattern = re.compile("Chapter [0-9]+")
             result = re.findall(chapter_pattern, self.ebook)
         except TypeError:
-            toc = self.ebook.get_toc()
-            result = [item[1] for item in toc if "Chapter" in item[1]]
+            # toc = self.ebook.get_toc()
+            self._table()
+            result = [item[0] for item in self.table if "Chapter" in item[0]]
         print(f"There are {len(result)} chapters in this book.")
 
     #Extract sentence where a specific word appears
@@ -90,8 +101,8 @@ class BookAnalysis():
             # result = []
             pattern = re.compile("[a-zA-Z]+")
             for page in self.ebook:
-                self.text = self.ebook[page.number]
-                page_words = self.text.get_text("words", sort=True)
+                text = self.ebook[page.number]
+                page_words = text.get_text("words", sort=True)
                 # all_words = [word for word in page_words if pattern.search(word[4])]
                 # all_words = [word[4] for word in page_words if pattern.findall(word[4])]
                 # for word in all_words:
@@ -123,16 +134,61 @@ class BookAnalysis():
 
     #Identifying the tone of a chapter
     def chapter_analysis(self):
-        self._read_book()
+        # self._read_book()
+        # analyzer = SentimentIntensityAnalyzer()
+        # scores = analyzer.polarity_scores("")
+        self.chapter_nb = input("Please, specify the number of the chapter you want to know the tone of:\n")
         analyzer = SentimentIntensityAnalyzer()
-        scores = analyzer.polarity_scores("")
+        # scores = analyzer.polarity_scores("")
 
+        try:
+            self._read_book()
+            chapter_pattern = re.compile(fr"Chapter {self.chapter_nb}")
+            # analyzer = SentimentIntensityAnalyzer()
+            # scores = analyzer.polarity_scores("")
+            scores = analyzer.polarity_scores(self.ebook)
+            # if scores["pos"] > scores["neg"]:
+            #     print ("This chapter has an overall positive tone")
+            # else:
+            #     print("This chapter's tone is not so uplifting")
+
+            # analyzer.polarity_scores(self.ebook)
+        except AttributeError:
+            self._table()
+            # chapter_pattern = re.compile("Chapter [0-9]+")
+            chosen_chapter = f"Chapter {self.chapter_nb}"
+            # chapter_start = self.chapters[chosen_chapter]
+            next_chapter = f"Chapter {int(self.chapter_nb) + 1}"
+            # chapter_end = self.chapters[next_chapter] - 1
+            # print(chapter_end)
+            # self.chapters = {}
+            # for item in self.toc:
+            #     if chapter_pattern.match(item[1]):
+            #         self.chapters[chapter_pattern.match(item[1]).group()] = item[2]
+            chapter_text = []
+            for page in self.ebook.pages(start=self.chapters[chosen_chapter], stop=self.chapters[next_chapter] - 1):
+                text = self.ebook[page.number]
+                page_text = text.get_text("text", sort=True)
+                chapter_text.append(page_text)
+            chapter_text =  " ".join(chapter_text)
+            # print(chapter_text)
+            scores = analyzer.polarity_scores(chapter_text)
+
+            # for page in self.ebook:
+            #     if f"Chapter {self.chapter_nb}" in self.chapter.keys() and page.number < self.chapters[f"Chapter {str(self.chapter_nb + 1)}"]:
+            #         self.text = self.ebook[page.number]
+            #         page_text = self.text.get_text("text", sort=True)
+            # print(self.ebook)
+
+        # analyzer = SentimentIntensityAnalyzer()
+        # scores = analyzer.polarity_scores("")
+        print(scores)
         if scores["pos"] > scores["neg"]:
             print ("This chapter has an overall positive tone")
         else:
             print("This chapter's tone is not so uplifting")
 
-        analyzer.polarity_scores(self.ebook)
+        # analyzer.polarity_scores(self.chapter_text)
 
     #Analyzing each chapter's tone
     def chapters_analysis(self):

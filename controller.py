@@ -64,8 +64,10 @@ class BookAnalysis():
         except TypeError:
             # toc = self.ebook.get_toc()
             self._table()
-            result = [item[0] for item in self.table if "Chapter" in item[0]]
+            result = [key for key in self.chapters.keys() if "Chapter" in key]
+            # result = [item[0] for item in self.chapters if "Chapter" in item[0]]
             # self.chapters_nb = len(result)
+        # print(result)
         self.chapters_nb = len(result)
         print(f"There are {self.chapters_nb} chapters in this book.")
 
@@ -202,7 +204,7 @@ class BookAnalysis():
             chapter_pattern = re.compile("Chapter [0-9]+")
             chapters = re.split(chapter_pattern, self.ebook)
             chapters = chapters[1:]
-            print(chapters)
+            # print(chapters)
 
         # scores = analyzer.polarity_scores("")
 
@@ -224,7 +226,7 @@ class BookAnalysis():
             # list_chapters = [index, value, self.chapters[value] for index,value in enumerate(self.chapters)]
             # list_chapters = [(key, value) in self.chapters.items()]
             list_chapters = [(key,value) for (key, value) in self.chapters.items()]
-            # print(list_chapters)
+            print(list_chapters)
             # next_chapter = next(list_chapters)
             # print(next_chapter[1])
             for chapter in list_chapters:
@@ -232,17 +234,26 @@ class BookAnalysis():
                 # print(list_chapters[list_chapters.index(chapter) + 1][1])
                 # print(list_chapters[list_chapters.index(chapter) + 1][1] - 1)
                 # print(list_chapters.index(chapter))
-                chapter_pages_nb= [chapter[1], list_chapters[list_chapters.index(chapter) + 1][1]-1]
+
+                # working code begins
+                # chapter_pages_nb= [chapter[1], list_chapters[list_chapters.index(chapter) + 1][1]-1]
                 # print(chapter_pages_nb)
-                chapter_text = [self.ebook.get_page_text(page) for page in chapter_pages_nb]
-                chapter_text = " ".join(chapter_text)
-                # chapter_text = self.ebook.get_page_text({chapter[1]}-{list_chapters[list_chapters.index(chapter) + 1][1] - 1})
+                # chapter_text = [self.ebook.get_page_text(page) for page in chapter_pages_nb]
+                # chapter_text = " ".join(chapter_text)
+                # working code ends
+                print(chapter[1])
+                # print(list_chapters[list_chapters.index(chapter) + 1][1] - 1)
+                try:
+                    chapter_text = self.ebook.get_page_text(chapter[1]-list_chapters[list_chapters.index(chapter) + 1][1] - 1)
+                except IndexError:
+                    chapter_text = self.ebook.get_page_text(chapter[1]-self.ebook.page_count)
+                # print(chapter_text)
                 scores = analyzer.polarity_scores(chapter_text)
-                print(scores)
+                # print(scores)
                 if scores["pos"] > scores["neg"]:
-                    print (f"Chapter {chapter[0]} has an overall positive tone")
+                    print (f"{chapter[0].title()} has an overall positive tone")
                 else:
-                    print(f"Chapter {chapter[0]} tone is not so uplifting")
+                    print(f"{chapter[0].title()} tone is not so uplifting")
 
             # for page in self.ebook.pages(start=self.chapters[chosen_chapter], stop=self.chapters[next_chapter] - 1):
             #     text = self.ebook[page.number]
